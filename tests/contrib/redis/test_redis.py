@@ -148,6 +148,16 @@ class TestRedisPatch(TracerTestCase):
             with pytest.raises(redis.exceptions.ConnectionError):
                 self.r.get("foo")
 
+    def test_timeout_error(self):
+        with mock.patch.object(
+            redis.connection.ConnectionPool,
+            "get_connection",
+            side_effect=redis.exceptions.TimeoutError("timeout"),
+        ):
+            with pytest.raises(redis.exceptions.TimeoutError):
+                self.r.get("foo")
+
+
     def test_analytics_without_rate(self):
         with self.override_config("redis", dict(analytics_enabled=True)):
             us = self.r.get("cheese")
